@@ -27,7 +27,6 @@ import cv2
 import numpy as np
 from glob import glob
 import imageio
-from distutils.util import strtobool
 
 
 try:  # Python 3.5+
