@@ -1,5 +1,5 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.1",
   "info": {
     "description": "This API will provide simple rotation and flip operations",
     "version": "1.0.0",
@@ -34,54 +34,20 @@
       "description": "Flip your image"
     }
   ],
-  "schemes": [
-    "https"
-  ],
   "paths": {
     "/rotate": {
       "post": {
+        "security": [
+          {
+            "apikey": []
+          }
+        ],
         "tags": [
           "rotate"
         ],
         "summary": "Rotate your image of the desired angle",
         "description": "Rotate image",
         "operationId": "rotate",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "image/jpg"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Rotation characteristics",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": [
-                "url",
-                "angle",
-                "cropping"
-              ],
-              "properties": {
-                "url": {
-                  "type": "string",
-                  "example": "https://i.ibb.co/JqLZ4KZ/input.png"
-                },
-                "angle": {
-                  "type": "integer",
-                  "example": 30
-                },
-                "cropping": {
-                  "type": "boolean",
-                  "example": false
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -95,59 +61,43 @@
             }
           },
           "400": {
-            "description": "Invalid input"
+            "description": "input error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "description": "Rotate the given picture of the desired angle",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RotateBody"
+              }
+            }
           }
         }
       }
     },
     "/flip": {
       "post": {
+        "security": [
+          {
+            "apikey": []
+          }
+        ],
         "tags": [
           "flip"
         ],
-        "summary": "Flip your image in the desired direction",
-        "description": "Flip your image",
+        "summary": "Flip your image horizontally or vertically",
+        "description": "Flip your image horizontally or vertically",
         "operationId": "flip",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "image/jpg"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Flip characteristics",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": [
-                "url",
-                "mode"
-              ],
-              "properties": {
-                "url": {
-                  "type": "string",
-                  "example": "https://i.ibb.co/JqLZ4KZ/input.png"
-                },
-                "mode": {
-                  "type": "string",
-                  "enum": [
-                    "horizontal",
-                    "vertical"
-                  ],
-                  "example": "horizontal"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
-              "image/*": {
+              "image/jpg": {
                 "schema": {
                   "type": "string",
                   "format": "binary"
@@ -156,75 +106,79 @@
             }
           },
           "400": {
-            "description": "Invalid input"
+            "description": "input error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "description": "Flip the given picture",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlipBody"
+              }
+            }
           }
         }
       }
     }
   },
-  "securityDefinitions": {
-    "petstore_auth": {
-      "type": "oauth2",
-      "authorizationUrl": "https://petstore.swagger.io/oauth/authorize",
-      "flow": "implicit",
-      "scopes": {
-        "write:pets": "modify pets in your account",
-        "read:pets": "read your pets"
+  "components": {
+    "securitySchemes": {
+      "apikey": {
+        "type": "apiKey",
+        "name": "X-OVH-Api-Key",
+        "in": "header"
       }
     },
-    "api_key": {
-      "type": "apiKey",
-      "name": "api_key",
-      "in": "header"
-    }
-  },
-  "definitions": {
-    "Rotate": {
-      "type": "object",
-      "required": [
-        "url",
-        "angle",
-        "cropping"
-      ],
-      "properties": {
-        "url": {
-          "type": "string",
-          "example": "https://i.ibb.co/JqLZ4KZ/input.png"
-        },
-        "angle": {
-          "type": "integer",
-          "example": 30
-        },
-        "cropping": {
-          "type": "boolean",
-          "example": false
+    "schemas": {
+      "RotateBody": {
+        "type": "object",
+        "required": [
+          "url",
+          "angle",
+          "cropping"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://i.ibb.co/pPPwSdq/Picture1.png"
+          },
+          "angle": {
+            "type": "integer",
+            "format": "int32",
+            "example": 30
+          },
+          "cropping": {
+            "type": "boolean",
+            "example": false
+          }
         }
-      }
-    },
-    "Flip": {
-      "type": "object",
-      "required": [
-        "url",
-        "mode"
-      ],
-      "properties": {
-        "url": {
-          "type": "string",
-          "example": "https://i.ibb.co/JqLZ4KZ/input.png"
-        },
-        "mode": {
-          "type": "string",
-          "enum": [
-            "horizontal",
-            "vertical"
-          ],
-          "example": "horizontal"
+      },
+      "FlipBody": {
+        "type": "object",
+        "required": [
+          "url",
+          "mode"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://i.ibb.co/pPPwSdq/Picture1.png"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "horizontal",
+              "vertical"
+            ],
+            "example": "horizontal"
+          }
         }
       }
     }
-  },
-  "externalDocs": {
-    "description": "Find out more about this API",
-    "url": "https://market-place.ai.ovh.net/#!/apis/114a9b9f-1737-4190-8a9b-9f173781907c/pages/4fb7baa4-70e7-40cc-b7ba-a470e750cc12"
   }
 }
