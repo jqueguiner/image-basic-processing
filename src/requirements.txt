@@ -1,0 +1,8 @@
+Pillow
+flask
+werkzeug
+requests
+gunicorn
+numpy
+cython
+opencv-python
