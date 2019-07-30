@@ -136,7 +136,7 @@ def rotate():
     try:
         url = request.json["url"]
         angle = request.json["angle"]
-        cropping = strtobool(request.json["cropping"])
+        cropping = request.json["cropping"]
         
         download(url, input_path)
 
