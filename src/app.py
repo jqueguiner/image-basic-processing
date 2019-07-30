@@ -25,7 +25,9 @@ from app_utils import get_multi_model_bin
 from PIL import Image
 import cv2
 import numpy as np
-
+from glob import glob
+import imageio
+from distutils.util import strtobool
 
 
 try:  # Python 3.5+
@@ -39,24 +41,116 @@ except ImportError:
 
 app = Flask(__name__)
 
+def rotate_image(mat, angle):
+    """
+    Rotates an image (angle in degrees) and expands image to avoid cropping
+    """
+
+    height, width = mat.shape[:2] # image shape has 3 dimensions
+    image_center = (width/2, height/2) # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
+
+    rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.)
+
+    # rotation calculates the cos and sin, taking absolutes of those.
+    abs_cos = abs(rotation_mat[0,0]) 
+    abs_sin = abs(rotation_mat[0,1])
+
+    # find the new width and height bounds
+    bound_w = int(height * abs_sin + width * abs_cos)
+    bound_h = int(height * abs_cos + width * abs_sin)
+
+    # subtract old image center (bringing image back to origo) and adding the new image center coordinates
+    rotation_mat[0, 2] += bound_w/2 - image_center[0]
+    rotation_mat[1, 2] += bound_h/2 - image_center[1]
+
+    # rotate image with the new bounds and translated rotation matrix
+    rotated_mat = cv2.warpAffine(mat, rotation_mat, (bound_w, bound_h))
+    return rotated_mat
+
+def compress_image(image, path_original):
+    size = 1920, 1080
+    width = 1920
+    height = 1080
+
+    name = os.path.basename(path_original).split('.')
+    first_name = os.path.join(os.path.dirname(path_original), name[0] + '.jpg')
+
+    if image.size[0] > width and image.size[1] > height:
+        image.thumbnail(size, Image.ANTIALIAS)
+        image.save(first_name, quality=85)
+    elif image.size[0] > width:
+        wpercent = (width/float(image.size[0]))
+        height = int((float(image.size[1])*float(wpercent)))
+        image = image.resize((width,height), PIL.Image.ANTIALIAS)
+        image.save(first_name,quality=85)
+    elif image.size[1] > height:
+        wpercent = (height/float(image.size[1]))
+        width = int((float(image.size[0])*float(wpercent)))
+        image = image.resize((width,height), PIL.Image.ANTIALIAS)
+        image.save(first_name, quality=85)
+    else:
+        image.save(first_name, quality=85)
+
+
+def convertToJPG(path_original):
+    img = Image.open(path_original)
+    name = os.path.basename(path_original).split('.')
+    first_name = os.path.join(os.path.dirname(path_original), name[0] + '.jpg')
+
+    if img.format == "JPEG":
+        image = img.convert('RGB')
+        compress_image(image, path_original)
+        img.close()
+
+    elif img.format == "GIF":
+        i = img.convert("RGBA")
+        bg = Image.new("RGBA", i.size)
+        image = Image.composite(i, bg, i)
+        compress_image(image, path_original)
+        img.close()
+
+    elif img.format == "PNG":
+        try:
+            image = Image.new("RGB", img.size, (255,255,255))
+            image.paste(img,img)
+            compress_image(image, path_original)
+        except ValueError:
+            image = img.convert('RGB')
+            compress_image(image, path_original)
+        
+        img.close()
+
+    elif img.format == "BMP":
+        image = img.convert('RGB')
+        compress_image(image, path_original)
+        img.close()
+
+
 
 @app.route("/rotate", methods=["POST"])
 def rotate():
-
 
     input_path = generate_random_filename(upload_directory,"jpg")
     output_path = generate_random_filename(upload_directory,"jpg")
 
     try:
         url = request.json["url"]
-        angle = request.json['angle']
+        angle = request.json["angle"]
+        cropping = strtobool(request.json["cropping"])
         
         download(url, input_path)
 
-        img = Image.open(input_path)
-        img = img.rotate(-1*int(angle))
+        convertToJPG(input_path)
 
-        img.save(output_path)
+        if cropping:
+            img = Image.open(input_path)
+            img = img.rotate(-1*int(angle))
+            img.save(output_path)
+
+        else:
+            M = imageio.imread(input_path)
+            img = rotate_image(M, int(angle))
+            imageio.imwrite(output_path, img)
 
         callback = send_file(output_path, mimetype='image/jpeg')
 
@@ -84,6 +178,8 @@ def flip():
         mode = request.json["mode"]
 
         download(url, input_path)
+
+        convertToJPG(input_path)
 
         img = Image.open(input_path)
 
