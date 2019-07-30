@@ -1,0 +1,230 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This API will provide simple rotation and flip operations",
+    "version": "1.0.0",
+    "title": "Picture Rotation and Flips",
+    "termsOfService": "https://market-place.ai.ovh.net/#!/cgu-en",
+    "contact": {
+      "name": "API Support",
+      "url": "https://gitter.im/ovh/ai"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/jqueguiner/image-basic-processing/blob/master/LICENSE"
+    }
+  },
+  "host": "api-market-place.ai.ovh.net",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "image transformation",
+      "description": "Everything you need for basic image transformations",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "https://bit.ly/330vz2s"
+      }
+    },
+    {
+      "name": "rotate",
+      "description": "Rotate your image"
+    },
+    {
+      "name": "flip",
+      "description": "Flip your image"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/rotate": {
+      "post": {
+        "tags": [
+          "rotate"
+        ],
+        "summary": "Rotate your image of the desired angle",
+        "description": "Rotate image",
+        "operationId": "rotate",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "image/jpg"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Rotation characteristics",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "url",
+                "angle",
+                "cropping"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "example": "https://i.ibb.co/JqLZ4KZ/input.png"
+                },
+                "angle": {
+                  "type": "integer",
+                  "example": 30
+                },
+                "cropping": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/jpg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/flip": {
+      "post": {
+        "tags": [
+          "flip"
+        ],
+        "summary": "Flip your image in the desired direction",
+        "description": "Flip your image",
+        "operationId": "flip",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "image/jpg"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Flip characteristics",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "url",
+                "mode"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "example": "https://i.ibb.co/JqLZ4KZ/input.png"
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "horizontal",
+                    "vertical"
+                  ],
+                  "example": "horizontal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "petstore_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "https://petstore.swagger.io/oauth/authorize",
+      "flow": "implicit",
+      "scopes": {
+        "write:pets": "modify pets in your account",
+        "read:pets": "read your pets"
+      }
+    },
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "Rotate": {
+      "type": "object",
+      "required": [
+        "url",
+        "angle",
+        "cropping"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "example": "https://i.ibb.co/JqLZ4KZ/input.png"
+        },
+        "angle": {
+          "type": "integer",
+          "example": 30
+        },
+        "cropping": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "Flip": {
+      "type": "object",
+      "required": [
+        "url",
+        "mode"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "example": "https://i.ibb.co/JqLZ4KZ/input.png"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ],
+          "example": "horizontal"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about this API",
+    "url": "https://market-place.ai.ovh.net/#!/apis/114a9b9f-1737-4190-8a9b-9f173781907c/pages/4fb7baa4-70e7-40cc-b7ba-a470e750cc12"
+  }
+}
