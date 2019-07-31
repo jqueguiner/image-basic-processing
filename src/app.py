@@ -134,7 +134,7 @@ def rotate():
 
     try:
         url = request.json["url"]
-        angle = request.json["angle"]
+        angle = int(request.json["angle"])
         cropping = request.json["cropping"]
         
         download(url, input_path)
@@ -143,12 +143,12 @@ def rotate():
 
         if cropping:
             img = Image.open(input_path)
-            img = img.rotate(-1*int(angle))
+            img = img.rotate(angle)
             img.save(output_path)
 
         else:
             M = imageio.imread(input_path)
-            img = rotate_image(M, int(angle))
+            img = rotate_image(M, angle)
             imageio.imwrite(output_path, img)
 
         callback = send_file(output_path, mimetype='image/jpeg')
