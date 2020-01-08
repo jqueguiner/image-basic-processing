@@ -233,15 +233,27 @@ def crop():
     input_path = generate_random_filename(upload_directory,"jpg")
     output_path = generate_random_filename(upload_directory,"jpg")
 
+
     try:
-        url = request.json["url"]
+        if 'file' in request.files:
+            file = request.files['file']
+            if allowed_file(file.filename):
+                file.save(input_path)
 
-        x1 = int(request.form['x1'])
-        y1 = int(request.form['y1'])
-        x2 = int(request.form['x2'])
-        y2 = int(request.form['y2'])
+            x1 = int(request.form.getlist('x1')[0])
+            y1 = int(request.form.getlist('y1')[0])
+            x2 = int(request.form.getlist('x2')[0])
+            y2 = int(request.form.getlist('y2')[0])
+            
+        else:
+            url = request.json["url"]
+            download(url, input_path)
 
-        download(url, input_path)
+            x1 = int(request.form['x1'])
+            y1 = int(request.form['y1'])
+            x2 = int(request.form['x2'])
+            y2 = int(request.form['y2'])
+
 
         img = Image.open(input_path)
 
