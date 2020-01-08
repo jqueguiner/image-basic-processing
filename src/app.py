@@ -40,6 +40,11 @@ except ImportError:
 
 app = Flask(__name__)
 
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 def rotate_image(mat, angle):
     """
     Rotates an image (angle in degrees) and expands image to avoid cropping
@@ -133,11 +138,22 @@ def rotate():
     output_path = generate_random_filename(upload_directory,"jpg")
 
     try:
-        url = request.json["url"]
-        angle = int(request.json["angle"])
-        cropping = request.json["cropping"]
+        if 'file' in request.files:
+            file = request.files['file']
+            if allowed_file(file.filename):
+                file.save(input_path)
+
+            cropping = bool(request.form.getlist('cropping')[0])
+
+            angle = int(request.form.getlist('angle')[0])
+            
+        else:
+            url = request.json["url"]
+            download(url, input_path)
+            angle = int(request.json["angle"])
+            cropping = request.json["cropping"]
         
-        download(url, input_path)
+        cropping = cropping.lower() in ['true', '1', 't', 'y', 'yes']
 
         convertToJPG(input_path)
 
