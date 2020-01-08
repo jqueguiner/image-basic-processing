@@ -188,11 +188,17 @@ def flip():
     input_path = generate_random_filename(upload_directory,"jpg")
     output_path = generate_random_filename(upload_directory,"jpg")
 
-    try:
-        url = request.json["url"]
-        mode = request.json["mode"]
+        if 'file' in request.files:
+            file = request.files['file']
+            if allowed_file(file.filename):
+                file.save(input_path)
 
-        download(url, input_path)
+            mode = request.form.getlist('mode')[0]
+            
+        else:
+            url = request.json["url"]
+            download(url, input_path)
+            mode = request.json["mode"]
 
         convertToJPG(input_path)
 
