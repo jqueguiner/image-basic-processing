@@ -188,6 +188,7 @@ def flip():
     input_path = generate_random_filename(upload_directory,"jpg")
     output_path = generate_random_filename(upload_directory,"jpg")
 
+    try:
         if 'file' in request.files:
             file = request.files['file']
             if allowed_file(file.filename):
