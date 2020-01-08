@@ -299,6 +299,8 @@ def crop():
 
 if __name__ == '__main__':
     global upload_directory
+    global ALLOWED_EXTENSIONS
+    ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
     upload_directory = '/src/upload/'
     create_directory(upload_directory)
