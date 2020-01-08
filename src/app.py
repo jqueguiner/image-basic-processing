@@ -143,7 +143,7 @@ def rotate():
             if allowed_file(file.filename):
                 file.save(input_path)
 
-            cropping = bool(request.form.getlist('cropping')[0])
+            cropping = request.form.getlist('cropping')[0]
 
             angle = int(request.form.getlist('angle')[0])
             
